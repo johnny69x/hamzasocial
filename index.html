@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>باقات إدارة الصفحات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: #0d0d14;
+    color: #fff;
+    min-height: 100vh;
+    padding: 40px 16px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #fff 40%, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #16161f;
+    border-radius: 24px;
+    padding: 28px 24px;
+    border: 1.5px solid #2a2a3a;
+    position: relative;
+    transition: transform 0.3s ease, border-color 0.3s;
+  }
+  .card:hover { transform: translateY(-4px); }
+
+  /* Starter - Blue */
+  .card.starter { border-color: #2563eb44; }
+  .card.starter:hover { border-color: #2563eb; }
+  .card.starter .icon-wrap { background: #1e3a8a22; }
+  .card.starter .icon { color: #3b82f6; }
+  .card.starter .price { color: #3b82f6; }
+  .card.starter .check { color: #3b82f6; }
+  .card.starter .btn { background: linear-gradient(135deg, #1d4ed8, #3b82f6); box-shadow: 0 4px 20px rgba(59,130,246,0.3); }
+  .card.starter .toggle.active { background: #3b82f6; }
+  .card.starter .addon-item-icon { color: #3b82f6; }
+
+  /* Growth - Green */
+  .card.growth { border-color: #16a34a55; background: #15191f; }
+  .card.growth:hover { border-color: #22c55e; }
+  .card.growth .icon-wrap { background: #14532d22; }
+  .card.growth .icon { color: #22c55e; }
+  .card.growth .price { color: #22c55e; }
+  .card.growth .check { color: #22c55e; }
+  .card.growth .btn { background: linear-gradient(135deg, #15803d, #22c55e); box-shadow: 0 4px 20px rgba(34,197,94,0.3); }
+  .card.growth .toggle.active { background: #22c55e; }
+  .card.growth .addon-item-icon { color: #22c55e; }
+
+  /* Intensive - Purple */
+  .card.intensive { border-color: #7c3aed55; }
+  .card.intensive:hover { border-color: #8b5cf6; }
+  .card.intensive .icon-wrap { background: #3b076422; }
+  .card.intensive .icon { color: #a78bfa; }
+  .card.intensive .price { color: #a78bfa; }
+  .card.intensive .check { color: #a78bfa; }
+  .card.intensive .btn { background: linear-gradient(135deg, #6d28d9, #a78bfa); box-shadow: 0 4px 20px rgba(167,139,250,0.3); }
+  .card.intensive .toggle.active { background: #a78bfa; }
+  .card.intensive .addon-item-icon { color: #a78bfa; }
+
+  .badge {
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 18px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+  .icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.5rem; }
+  .card-title { font-size: 1.35rem; font-weight: 900; }
+  .card-desc { color: #888; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; }
+
+  .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 22px; }
+  .price { font-size: 2.6rem; font-weight: 900; line-height: 1; transition: all 0.4s ease; }
+  .price-unit { color: #666; font-size: 0.85rem; }
+
+  .price-addon-note {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .price-addon-note.visible { display: block; }
+
+  .divider { border: none; border-top: 1px solid #2a2a3a; margin-bottom: 18px; }
+
+  .features-title { font-size: 0.82rem; color: #666; font-weight: 700; margin-bottom: 14px; letter-spacing: 0.05em; }
+  .features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 24px; }
+  .features li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #ccc; }
+  .check { font-size: 1rem; flex-shrink: 0; }
+
+  /* Addon box */
+  .addon {
+    background: #1e1e2e;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #2a2a3a;
+    transition: border-color 0.3s;
+  }
+  .addon.active { border-color: #3a3a5a; }
+
+  .addon-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .addon-text { font-size: 0.85rem; font-weight: 700; }
+  .addon-sub { font-size: 0.75rem; color: #666; margin-top: 2px; }
+
+  .toggle {
+    width: 44px; height: 24px;
+    background: #2a2a3a;
+    border-radius: 12px;
+    position: relative;
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: background 0.3s;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 18px; height: 18px;
+    background: #555;
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  .toggle.active::after {
+    right: auto;
+    left: 3px;
+    background: #fff;
+  }
+
+  /* Addon items (hidden by default) */
+  .addon-items {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s;
+    opacity: 0;
+  }
+  .addon-items.visible {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 12px;
+  }
+
+  .addon-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-top: 1px solid #2a2a3a;
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.5;
+  }
+
+  .addon-item-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn:hover { opacity: 0.9; transform: scale(0.99); }
+  .btn:active { transform: scale(0.97); }
+
+  /* Animations */
+  .card {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.5s ease forwards;
+  }
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.25s; }
+  .card:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<h1>اختر باقتك</h1>
+<p class="subtitle">كل الباقات تشمل إدارة صفحة احترافية + إعلانات ممولة</p>
+
+<div class="cards">
+
+  <!-- Starter -->
+  <div class="card starter">
+    <div class="card-header">
+      <div class="icon-wrap"><span class="icon">⚡</span></div>
+      <div><div class="card-title">باقة البداية</div></div>
+    </div>
+    <p class="card-desc">مثالية للصفحات الناشئة التي تبحث عن انطلاقة قوية.</p>
+    <div class="price-row">
+      <span class="price" id="price-starter">1000</span>
+      <span class="price-unit">د.ل / شهرياً</span>
+    </div>
+    <p class="price-addon-note" id="note-starter">يشمل إضافة +550 د.ل للإضافات المتقدمة</p>
+    <hr class="divider">
+    <p class="features-title">المميزات الأساسية:</p>
+    <ul class="features">
+      <li><span class="check">✓</span> زيادة 1,000 متابع مجاناً</li>
+      <li><span class="check">✓</span> منشورَين في اليوم</li>
+      <li><span class="check">✓</span> إعلانات ممولة بقيمة $50 (تفاعل - رسائل - متابعين)</li>
+      <li><span class="check">✓</span> بوت رد آلي</li>
+      <li><span class="check">✓</span> تصاميم AI احترافية</li>
+    </ul>
+    <div class="addon" id="addon-starter">
+      <div class="addon-header" onclick="toggleAddon('starter', 550, ['employee'])">
+        <div>
+          <div class="addon-text">تفعيل الإضافات المتقدمة</div>
+          <div class="addon-sub">احصل على خدمات إضافية مميزة</div>
+        </div>
+        <div class="toggle" id="toggle-starter"></div>
+      </div>
+      <div class="addon-items" id="items-starter">
+        <div class="addon-item">
+          <span class="addon-item-icon">⊕</span>
+          <span>موظف رد على خاص الصفحة (حسب ساعات الدوام)</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn">طلب الباقة الآن</button>
+  </div>
+
+  <!-- Growth -->
+  <div class="card growth">
+    <div class="card-header">
+      <div class="icon-wrap"><span class="icon">🚀</span></div>
+      <div><div class="card-title">باقة النمو</div></div>
+    </div>
+    <p class="card-desc">للصفحات التي تريد تسريع نموها بشكل ملحوظ وخطوات ثابتة.</p>
+    <div class="price-row">
+      <span class="price" id="price-growth">1,350</span>
+      <span class="price-unit">د.ل / شهرياً</span>
+    </div>
+    <p class="price-addon-note" id="note-growth">يشمل إضافة +750 د.ل للإضافات المتقدمة</p>
+    <hr class="divider">
+    <p class="features-title">المميزات الأساسية:</p>
+    <ul class="features">
+      <li><span class="check">✓</span> زيادة 5,000 متابع مجاناً</li>
+      <li><span class="check">✓</span> 3-4 منشورات في اليوم</li>
+      <li><span class="check">✓</span> إعلانات ممولة بقيمة $90 (تفاعل - رسائل - متابعين)</li>
+      <li><span class="check">✓</span> بوت رد آلي</li>
+      <li><span class="check">✓</span> تصاميم AI احترافية</li>
+    </ul>
+    <div class="addon" id="addon-growth">
+      <div class="addon-header" onclick="toggleAddon('growth', 750, ['employee', 'photographer'])">
+        <div>
+          <div class="addon-text">تفعيل الإضافات المتقدمة</div>
+          <div class="addon-sub">احصل على خدمات إضافية مميزة</div>
+        </div>
+        <div class="toggle" id="toggle-growth"></div>
+      </div>
+      <div class="addon-items" id="items-growth">
+        <div class="addon-item">
+          <span class="addon-item-icon">⊕</span>
+          <span>موظف رد على خاص الصفحة (حسب ساعات الدوام)</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-item-icon">⊕</span>
+          <span>إرسال مندوب تصوير مرة أسبوعياً</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn">طلب الباقة الآن</button>
+  </div>
+
+  <!-- Intensive -->
+  <div class="card intensive">
+    <div class="badge">الأكثر طلباً</div>
+    <div class="card-header">
+      <div class="icon-wrap"><span class="icon">📈</span></div>
+      <div><div class="card-title">باقة المكثف</div></div>
+    </div>
+    <p class="card-desc">لأصحاب الأعمال الذين يبحثون عن هيمنة كاملة ونمو سريع.</p>
+    <div class="price-row">
+      <span class="price" id="price-intensive">1,750</span>
+      <span class="price-unit">د.ل / شهرياً</span>
+    </div>
+    <p class="price-addon-note" id="note-intensive">يشمل إضافة +1,000 د.ل للإضافات المتقدمة</p>
+    <hr class="divider">
+    <p class="features-title">المميزات الأساسية:</p>
+    <ul class="features">
+      <li><span class="check">✓</span> زيادة 10,000 متابع مجاناً</li>
+      <li><span class="check">✓</span> 4-6 منشورات في اليوم</li>
+      <li><span class="check">✓</span> إعلانات ممولة بقيمة $125 (تفاعل - رسائل - متابعين)</li>
+      <li><span class="check">✓</span> بوت رد آلي</li>
+      <li><span class="check">✓</span> تصاميم AI احترافية</li>
+    </ul>
+    <div class="addon" id="addon-intensive">
+      <div class="addon-header" onclick="toggleAddon('intensive', 1000, ['employee', 'photographer'])">
+        <div>
+          <div class="addon-text">تفعيل الإضافات المتقدمة</div>
+          <div class="addon-sub">احصل على خدمات إضافية مميزة</div>
+        </div>
+        <div class="toggle" id="toggle-intensive"></div>
+      </div>
+      <div class="addon-items" id="items-intensive">
+        <div class="addon-item">
+          <span class="addon-item-icon">⊕</span>
+          <span>موظف رد على خاص الصفحة (حسب ساعات الدوام)</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-item-icon">⊕</span>
+          <span>إرسال مندوب تصوير مرتين أسبوعياً</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn">طلب الباقة الآن</button>
+  </div>
+
+</div>
+
+<script>
+  const basePrices = { starter: 950, growth: 1350, intensive: 1750 };
+  const states = { starter: false, growth: false, intensive: false };
+
+  function formatPrice(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function toggleAddon(id, extra, types) {
+    const isActive = states[id];
+    states[id] = !isActive;
+
+    const toggle = document.getElementById('toggle-' + id);
+    const items = document.getElementById('items-' + id);
+    const priceEl = document.getElementById('price-' + id);
+    const noteEl = document.getElementById('note-' + id);
+    const addonBox = document.getElementById('addon-' + id);
+
+    if (states[id]) {
+      toggle.classList.add('active');
+      items.classList.add('visible');
+      addonBox.classList.add('active');
+      priceEl.textContent = formatPrice(basePrices[id] + extra);
+      noteEl.classList.add('visible');
+    } else {
+      toggle.classList.remove('active');
+      items.classList.remove('visible');
+      addonBox.classList.remove('active');
+      priceEl.textContent = formatPrice(basePrices[id]);
+      noteEl.classList.remove('visible');
+    }
+  }
+</script>
+
+</body>
+</html>
